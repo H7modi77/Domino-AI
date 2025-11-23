@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Domino AI Game</title>
+<style>
+body {
+    margin:0; padding:0; background:#111; color:gold;
+    font-family: 'Arial Black', sans-serif; text-align:center;
+}
+#game-container {
+    max-width:900px; margin:20px auto; padding:20px;
+    background: linear-gradient(145deg, #222, #111);
+    border-radius:20px; box-shadow:0 0 30px gold;
+}
+#logo { font-size:3em; color:gold; text-shadow:0 0 10px #fff,0 0 20px gold;}
+#board { width:800px; height:300px; margin:20px auto; background:#222; border:2px solid gold; border-radius:15px;}
+#player-hand,#ai-hand{display:flex; justify-content:center; margin:10px 0;}
+#controls{margin-top:20px;}
+button{padding:10px 20px; background:gold; border:none; border-radius:10px; font-weight:bold; cursor:pointer; box-shadow:0 0 10px #fff; transition:0.2s;}
+button:hover{background:#ffdd00; transform:scale(1.05);}
+#status{margin-top:20px; font-size:1.5em;}
+.tile{
+    width:50px; height:25px; background:white; color:black;
+    border:2px solid gold; border-radius:5px; margin:2px;
+    display:flex; justify-content:space-around; align-items:center;
+    font-weight:bold; cursor:pointer;
+}
+</style>
+</head>
+<body>
+<div id="game-container">
+  <h1 id="logo">DOMINO AI</h1>
+  <div id="board"></div>
+  <div id="player-hand"></div>
+  <div id="ai-hand"></div>
+  <div id="controls">
+      <label>Select AI Level:</label>
+      <select id="difficulty">
+          <option value="1">Level 1</option>
+          <option value="2">Level 2</option>
+          <option value="3">Level 3</option>
+          <option value="4">Level 4</option>
+          <option value="5">Level 5</option>
+          <option value="6">Level 6</option>
+          <option value="7">Level 7</option>
+          <option value="8">Level 8</option>
+          <option value="9">Level 9</option>
+          <option value="10">Level 10</option>
+      </select>
+      <button id="start-btn">Start Game</button>
+  </div>
+  <div id="status"></div>
+</div>
+
+<script>
+// ==== DOMINO CLASS ====
+class Domino{
+    constructor(a,b){this.a=a; this.b=b;}
+}
+
+// ==== BOARD CLASS ====
+class Board{
+    constructor(){this.tiles=[];}
+    placeTile(tile){
+        this.tiles.push(tile);
+        updateBoardUI();
+    }
+}
+
+function updateBoardUI(){
+    const boardDiv = document.getElementById("board");
+    boardDiv.innerHTML = "";
+    board.tiles.forEach(t=>{
+        const div = document.createElement("div");
+        div.className="tile";
+        div.innerText = `${t.a}|${t.b}`;
+        boardDiv.appendChild(div);
+    });
+}
+
+// ==== PLAYER CLASS ====
+class Player{
+    constructor(name){this.name=name; this.hand=[];}
+    playTile(index){
+        if(index<0 || index>=this.hand.length) return;
+        const tile = this.hand.splice(index,1)[0];
+        board.placeTile(tile);
+    }
+}
+
+// ==== AI MOVES ====
+function aiMove(level){
+    // Level 1 = random
+    let index = Math.floor(Math.random()*aiPlayer.hand.length);
+    aiPlayer.playTile(index);
+}
+
+// ==== GAME SETUP ====
+let board = new Board();
+let player = new Player("You");
+let aiPlayer = new Player("AI");
+
+function dealTiles(){
+    player.hand=[]; aiPlayer.hand=[]; board.tiles=[];
+    let allTiles=[];
+    for(let i=0;i<=6;i++){
+        for(let j=i;j<=6;j++){ allTiles.push(new Domino(i,j)); }
+    }
+    allTiles.sort(()=>Math.random()-0.5);
+    player.hand = allTiles.slice(0,7);
+    aiPlayer.hand = allTiles.slice(7,14);
+    renderHands();
+    updateBoardUI();
+}
+
+function renderHands(){
+    const ph = document.getElementById("player-hand");
+    ph.innerHTML="";
+    player.hand.forEach((t,i)=>{
+        const div = document.createElement("div");
+        div.className="tile"; div.innerText=`${t.a}|${t.b}`;
+        div.onclick = ()=>{ player.playTile(i); aiMove(parseInt(document.getElementById("difficulty").value)); renderHands();}
+        ph.appendChild(div);
+    });
+
+    const ah = document.getElementById("ai-hand");
+    ah.innerHTML="";
+    aiPlayer.hand.forEach(t=>{
+        const div = document.createElement("div");
+        div.className="tile"; div.innerText="🂠"; // AI cards hidden
+        ah.appendChild(div);
+    });
+}
+
+// ==== START BUTTON ====
+document.getElementById("start-btn").addEventListener("click",()=>{
+    document.getElementById("status").innerText="Game Started!";
+    dealTiles();
+});
+
+</script>
+</body>
+</html>
